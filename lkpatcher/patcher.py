@@ -59,7 +59,7 @@ class PatchManager:
         # forces the function that prints the warning in
         # regard to the device's verification.
         "red_state": {
-            "08b50a4b7b441b681b68022b": "00207047",
+            "f0b5002489b0": "00207047",
         },
     }
 
@@ -137,6 +137,7 @@ class LkPatcher:
                     # and remove it from the available patches.
                     self.image.apply_patch(needle, patch)
                     del self.patch_manager.patches[category][needle]
+                    self.logger.info(f'Applied patch {needle}.')
                 except NeedleNotFoundException:
                     # This is fine, not all the patches are present
                     # in all the bootloaders. Just skip it and move on.

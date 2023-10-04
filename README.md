@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/github/license/R0rt1z2/lkpatcher)
 ![GitHub Issues](https://img.shields.io/github/issues-raw/R0rt1z2/lkpatcher?color=red)
 
-`lkpatcher` serves as both a streamlined Python tool and module designed for the alteration and patching of LK (_Little Kernel_) images. The utility offers flexibility along with an intuitive API for ease of use. To operate the library, **Python 3.11** or higher is required. An alternative method of access is available via the [new web version](https://lkpatcher.r0rt1z2.com/) of the tool, which is not open-source but offers the same functionality and has a GUI.
+`lkpatcher` serves as both a streamlined Python tool and module designed for the alteration and patching of LK (_Little Kernel_) images. The utility offers flexibility along with an intuitive API for ease of use. To use the library, **Python 3.11** or higher is required. An alternative method of access is available via the [new web version](https://lkpatcher.r0rt1z2.com/) of the tool, which is not open-source but offers the same functionality and has a GUI.
 
 ## Installation
 

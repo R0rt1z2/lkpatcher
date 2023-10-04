@@ -137,11 +137,10 @@ class LkPatcher:
                     # and remove it from the available patches.
                     self.image.apply_patch(needle, patch)
                     del self.patch_manager.patches[category][needle]
-                    self.logger.info(f'Applied patch {needle}.')
                 except NeedleNotFoundException:
                     # This is fine, not all the patches are present
                     # in all the bootloaders. Just skip it and move on.
-                    self.logger.debug(f'Skipping invalid needle {needle}.')
+                    self.logger.warning(f'Skipping invalid needle {needle}.')
 
         # Compare the size of the available patches with the original
         # size of the patches. If they're the same, it means we could

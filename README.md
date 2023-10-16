@@ -11,13 +11,15 @@
 sudo apt install python3-pip # If you don't have pip installed.
 pip3 install --upgrade git+https://github.com/R0rt1z2/lkpatcher
 ```
-> _<small>Windows users should omit the first command and install python manually from [here](https://www.python.org/downloads/).</small>_
+> <small>[!NOTE]
+> _Windows users should omit the first command and install python manually from [here](https://www.python.org/downloads/)._</small>
 
 ## Instructions
 ```bash
 python3 -m lkpatcher <lk image> [-j <json file>] [-o <output file>]
 ```
-> _<small>Arguments between `<>` are required, while arguments between `[]` are optional.</small>_
+> <small>[!NOTE]
+> _Arguments between `<>` are required, while arguments between `[]` are optional.</small>_
 
 You can also use the module in your own projects:
 ```python

@@ -44,7 +44,7 @@ class PatchManager:
         # This is done by forcing the function that checks
         # for the current vbmeta state to always return 0.
         "dm_verity": {
-            "30b583b002ab": "00207047",
+            "30b583b002ab0022": "00207047",
         },
 
         # Disable the annoying warning message that shows

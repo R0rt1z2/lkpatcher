@@ -43,8 +43,15 @@ def main():
     parser.add_argument('-j', '--json', type=Path,
                         help='Path to the json file with patches.')
 
+    # Secondary LkPatcher arguments (dumping).
+    parser.add_argument('-d', '--dump-partition', type=str,
+                        help='Name of the partition to dump.')
+
     args = parser.parse_args()
     patcher = LkPatcher(image=args.bootloader_image, patches=args.json)
+
+    if args.dump_partition:
+        return patcher.dump_partition(args.dump_partition)
 
     image = patcher.patch(args.output)
     logging.info("Patched image saved to %s.", image)

@@ -169,3 +169,38 @@ class LkPatcher:
         # Return the path to the patched image.
         self.logger.info(f'Successfully applied {available_patches} patches.')
         return output
+
+    def dump_partition(self, partname):
+        '''
+        Dump a partition from the bootloader image.
+        :param partname: Name of the partition to dump.
+        :return: None
+        '''
+        # Try to retrieve the partition from the image.
+        partition = self.image.get_partition_by_name(partname)
+
+        # Make sure the partition exists.
+        if not partition:
+            # If it doesn't, print the available partitions and return.
+            self.logger.error(f'Unable to find partition {partname}!')
+            self.logger.warning(f'Available partitions: '
+                                f'{self.image.get_partition_list()}')
+            return
+
+        # We know the partition exists so we cant print its
+        # information to the user.
+        print("=====================================")
+        print(str(partition))
+        print("=====================================")
+
+        # Lastly, dump the partition to a file.
+        try:
+            with open(f'{partname}.bin', 'wb') as fp:
+                fp.write(partition.data)
+        except FileNotFoundError as e:
+            raise InvalidIOFile(e.strerror, partname)
+        except PermissionError as e:
+            raise InvalidIOFile(e.strerror, partname)
+
+        self.logger.info(f'Successfully dumped partition '
+                         f'{partname} to {partname}.bin.')

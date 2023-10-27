@@ -16,7 +16,7 @@ pip3 install --upgrade git+https://github.com/R0rt1z2/lkpatcher
 
 ## Instructions
 ```bash
-python3 -m lkpatcher <lk image> [-j <json file>] [-o <output file>]
+python3 -m lkpatcher [-h] [-o OUTPUT] [-j JSON] [-d DUMP_PARTITION] bootloader_image
 ```
 > <small>[!NOTE]
 > _Arguments between `<>` are required, while arguments between `[]` are optional.</small>_

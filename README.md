@@ -9,10 +9,11 @@
 
 ```bash
 sudo apt install python3-pip # If you don't have pip installed.
+pip3 install --upgrade pip   # If pip hasn't been updated yet.
 pip3 install --upgrade git+https://github.com/R0rt1z2/lkpatcher
 ```
 > <small>[!NOTE]
-> _Windows users should omit the first command and install python manually from [here](https://www.python.org/downloads/)._</small>
+> _Windows users should omit the first two command(s) and install python manually from [here](https://www.python.org/downloads/)._</small>
 
 ## Instructions
 ```bash

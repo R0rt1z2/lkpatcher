@@ -53,6 +53,7 @@ class PatchManager:
         # for the current LCS state to always return 0.
         "orange_state": {
             "08b50a4b7b441b681b68022b": "00207047",
+            "08b50e4b7b441b681b68022b": "00207047"
         },
 
         # This shouldn't be necessary, but regardless, it

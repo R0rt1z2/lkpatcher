@@ -1,21 +1,43 @@
-# This file is part of 'lkpatcher'. Copyright (c) 2023 Roger Ortiz.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
+"""
+SPDX-FileCopyrightText: 2025 Roger Ortiz <me@r0rt1z2.com>
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
 
 from pathlib import Path
+from typing import Final
 
-__version__ = "3.0.0"
+from lkpatcher.config import PatcherConfig
+from lkpatcher.exceptions import (
+    ConfigurationError,
+    InvalidIOFile,
+    LkPatcherError,
+    NoNeedlesFound,
+    PatchValidationError,
+)
+from lkpatcher.patcher import LkPatcher, PatchManager
 
-module_path = Path(__file__).parent
-current_path = Path.cwd()
+__version__: Final[str] = '4.0.0'
+__author__: Final[str] = 'Roger Ortiz <me@r0rt1z2.com>'
+__description__: Final[str] = 'MediaTek bootloader patcher'
+
+module_path: Final[Path] = Path(__file__).parent
+current_path: Final[Path] = Path.cwd()
+
+__all__ = [
+    # Classes
+    'LkPatcher',
+    'PatchManager',
+    'PatcherConfig',
+    # Exceptions
+    'LkPatcherError',
+    'InvalidIOFile',
+    'NoNeedlesFound',
+    'ConfigurationError',
+    'PatchValidationError',
+    # Constants
+    'module_path',
+    'current_path',
+    '__version__',
+    '__author__',
+    '__description__',
+]

@@ -1,30 +1,116 @@
-#
-# This file is part of 'lkpatcher'. Copyright (c) 2023 Roger Ortiz.
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3.
-#
-# This program is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-# General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
-#
+"""
+SPDX-FileCopyrightText: 2025 Roger Ortiz <me@r0rt1z2.com>
+SPDX-License-Identifier: GPL-3.0-or-later
+"""
+
+from __future__ import annotations
 
 from pathlib import Path
-from typing import Union
+from typing import Optional, Union
 
-class InvalidIOFile(Exception):
-    """Raised when we fail to read/write a file"""
-    def __init__(self, message: str, file: Union[str, Path]) -> None:
-        self.file = file
+
+class LkPatcherError(Exception):
+    """Base exception for LK patcher-related errors."""
+
+    def __init__(self, message: str):
+        """
+        Initialize the LK patcher error.
+
+        Args:
+            message: Descriptive error message
+        """
+        super().__init__(message)
         self.message = message
 
-    def __str__(self) -> str:
-        return f"Unable to open {self.file}: {self.message}"
 
-class NoNeedlesFound(Exception):
-    """Raised when we fail to find any needles"""
+class InvalidIOFile(LkPatcherError):
+    """
+    Raised when a file cannot be read or written.
+
+    Attributes:
+        file: Path to the file that caused the error
+        reason: Specific reason for I/O failure
+    """
+
+    def __init__(self, reason: str, file: Union[str, Path]):
+        """
+        Initialize the invalid I/O file error.
+
+        Args:
+            reason: Reason for I/O failure
+            file: Path to the file that caused the error
+        """
+        super().__init__(f'Unable to access {file}: {reason}')
+        self.file = file
+        self.reason = reason
+
+
+class NoNeedlesFound(LkPatcherError):
+    """
+    Raised when no patch needles are found in the image.
+
+    Attributes:
+        image: Path to the image where no needles were found
+    """
+
+    def __init__(self, image: Union[str, Path]):
+        """
+        Initialize the no needles found error.
+
+        Args:
+            image: Path to the image where no needles were found
+        """
+        super().__init__(f'No needles found in {image}')
+        self.image = image
+
+
+class ConfigurationError(LkPatcherError):
+    """
+    Raised when there's an error in the configuration.
+
+    Attributes:
+        config_file: Optional path to the configuration file
+        detail: Detailed description of the configuration error
+    """
+
+    def __init__(
+        self, detail: str, config_file: Optional[Union[str, Path]] = None
+    ):
+        """
+        Initialize the configuration error.
+
+        Args:
+            detail: Detailed description of the configuration error
+            config_file: Optional path to the configuration file
+        """
+        message = f'Configuration error: {detail}'
+        if config_file:
+            message = f'{message} (in {config_file})'
+        super().__init__(message)
+        self.detail = detail
+        self.config_file = config_file
+
+
+class PatchValidationError(LkPatcherError):
+    """
+    Raised when a patch fails validation.
+
+    Attributes:
+        needle: The invalid needle
+        patch: The invalid patch
+        reason: Reason for validation failure
+    """
+
+    def __init__(self, needle: str, patch: str, reason: str):
+        """
+        Initialize the patch validation error.
+
+        Args:
+            needle: The invalid needle
+            patch: The invalid patch
+            reason: Reason for validation failure
+        """
+        super().__init__(f'Invalid patch {needle} -> {patch}: {reason}')
+        self.needle = needle
+        self.patch = patch
+        self.reason = reason

@@ -4,16 +4,20 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lkpatcher"
-version = "3.0.0"
+version = "4.0.0"
 authors = [
     { name = "Roger Ortiz", email = "me@r0rt1z2.com" }
 ]
-description = "A simple tool for patching and modifying the bootloader (LK) of MTK devices."
+description = "Advanced tool for patching and analyzing MediaTek bootloader (LK) images."
 readme = "README.md"
-requires-python = ">=3.11.0"
+requires-python = ">=3.8.0"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: System :: Boot",
+    "Topic :: System :: Recovery Tools",
 ]
 dynamic = ["dependencies"]
 
@@ -22,3 +26,10 @@ dependencies = {file = ["requirements.txt"]}
 
 [project.urls]
 homepage = "https://github.com/R0rt1z2/lkpatcher"
+documentation = "https://github.com/R0rt1z2/lkpatcher/blob/master/README.md"
+issues = "https://github.com/R0rt1z2/lkpatcher/issues"
+
+[tool.mypy]
+python_version = "3.8"
+disallow_untyped_defs = true
+disallow_incomplete_defs = true

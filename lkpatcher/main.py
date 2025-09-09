@@ -92,17 +92,15 @@ def list_partitions(patcher: LkPatcher) -> None:
     Args:
         patcher: LkPatcher instance
     """
-    partitions = patcher.image.get_partition_list()
+    partitions = patcher.image.partitions
     if not partitions:
         print('No partitions found in image.')
         return
 
     print('\nPartitions in bootloader image:')
     print('-' * 40)
-    for i, name in enumerate(partitions, 1):
-        partition = patcher.image.get_partition_by_name(name)
-        if partition:
-            print(f'{i}. {name} ({len(partition)} bytes)')
+    for i, (name, partition) in enumerate(partitions.items(), 1):
+        print(f'{i}. {name} ({len(partition.data)} bytes)')
     print('-' * 40)
 
 
@@ -339,7 +337,7 @@ def main() -> int:
             return 0
 
         if args.partition_info:
-            partition = patcher.image.get_partition_by_name(args.partition_info)
+            partition = patcher.image.partitions.get(args.partition_info)
             if partition:
                 display_partition_info(partition)
             else:

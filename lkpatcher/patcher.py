@@ -353,10 +353,8 @@ class LkPatcher:
         if applied_count == 0 and not self.config.dry_run:
             debug_path = f'{self.image.path}.debug.txt'
             with open(debug_path, 'w') as fp:
-                for partition_name in self.image.get_partition_list():
-                    partition = self.image.get_partition_by_name(partition_name)
-                    if partition:
-                        fp.write(f'{partition_name}:\n{partition}\n\n')
+                for partition_name, partition in self.image.partitions.items():
+                    fp.write(f'{partition_name}:\n{partition}\n\n')
 
             self.logger.info(
                 'Dumped partition info to %s for debugging', debug_path
@@ -420,12 +418,12 @@ class LkPatcher:
         Raises:
             InvalidIOFile: If the partition file cannot be written
         """
-        partition = self.image.get_partition_by_name(partition_name)
+        partition = self.image.partitions.get(partition_name)
 
         if not partition:
             self.logger.error('Partition not found: %s', partition_name)
             self.logger.info(
-                'Available partitions: %s', self.image.get_partition_list()
+                'Available partitions: %s', list(self.image.partitions.keys())
             )
             return None
 
@@ -469,11 +467,7 @@ class LkPatcher:
         output_dir.mkdir(parents=True, exist_ok=True)
 
         saved_paths: List[Path] = []
-        for partition_name in self.image.get_partition_list():
-            partition = self.image.get_partition_by_name(partition_name)
-            if not partition:
-                continue
-
+        for partition_name, partition in self.image.partitions.items():
             safe_name = ''.join(
                 c if c.isalnum() else '_' for c in partition_name
             )
@@ -504,28 +498,24 @@ class LkPatcher:
         if not self.image:
             return {'error': 'No image loaded'}
 
-        partitions = self.image.get_partition_list()
         partition_info = []
-
         total_size = len(self.image.contents) if self.image.contents else 0
 
-        for name in partitions:
-            partition = self.image.get_partition_by_name(name)
-            if partition:
-                partition_info.append(
-                    {
-                        'name': name,
-                        'size': len(partition.data),
-                        'has_ext_header': partition.has_ext,
-                        'memory_address': f'0x{partition.header.memory_address:08x}',
-                    }
-                )
+        for name, partition in self.image.partitions.items():
+            partition_info.append(
+                {
+                    'name': name,
+                    'size': len(partition.data),
+                    'has_ext_header': partition.header.is_extended,
+                    'memory_address': f'0x{partition.header.memory_address:08x}',
+                }
+            )
 
         return {
             'image_path': str(self.image.path)
             if self.image.path
             else 'Unknown',
             'image_size': total_size,
-            'partition_count': len(partitions),
+            'partition_count': len(self.image.partitions),
             'partitions': partition_info,
         }

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "lkpatcher"
-version = "4.0.0"
+version = "4.0.1"
 authors = [
     { name = "Roger Ortiz", email = "me@r0rt1z2.com" }
 ]

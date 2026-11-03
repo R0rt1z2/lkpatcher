@@ -54,7 +54,7 @@ python3 -m lkpatcher [-h] [options] bootloader_image
 #### Partition Management:
 ```
 --add-partition NAME FILE   Add new partition with NAME from FILE
---remove-partition NAME     Remove partition with NAME  
+--remove-partition NAME     Remove partition with NAME
 --add-certificate PART FILE Add certificate from FILE to partition PART
 --partition-address ADDR    Memory address for new partition (hex or decimal)
 --partition-legacy          Use legacy header format for new partitions

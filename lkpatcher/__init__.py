@@ -17,7 +17,7 @@ from lkpatcher.exceptions import (
 )
 from lkpatcher.patcher import LkPatcher, PatchManager
 
-__version__: Final[str] = '4.2.0'
+__version__: Final[str] = '4.3.0'
 __author__: Final[str] = 'Roger Ortiz <me@r0rt1z2.com>'
 __description__: Final[str] = 'MediaTek bootloader patcher'
 

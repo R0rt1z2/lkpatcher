@@ -54,9 +54,10 @@ python3 -m lkpatcher [-h] [options] bootloader_image
 #### Partition Management:
 ```
 --add-partition NAME FILE   Add new partition with NAME from FILE
+--replace-partition NAME FILE Replace partition with NAME from FILE
 --remove-partition NAME     Remove partition with NAME
 --add-certificate PART FILE Add certificate from FILE to partition PART
---partition-address ADDR    Memory address for new partition (hex or decimal)
+--partition-address ADDR    Memory address for new or replaced partition (hex or decimal)
 --partition-legacy          Use legacy header format for new partitions
 --cert-type TYPE            Certificate type for --add-certificate (cert1, cert2)
 ```
@@ -108,6 +109,9 @@ python3 -m lkpatcher lk.img --analyze-policies
 
 # Add a new partition
 python3 -m lkpatcher lk.img --add-partition custom data.bin --partition-address 0x41000000
+
+# Replace an existing partition
+python3 -m lkpatcher lk.img --replace-partition lk u-boot.bin --cert-bypass wrap
 
 # Remove an existing partition
 python3 -m lkpatcher lk.img --remove-partition unwanted

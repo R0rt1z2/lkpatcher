@@ -5,7 +5,7 @@
 
 `lkpatcher` is a comprehensive Python tool and module designed for modifying and patching LK (_Little Kernel_) bootloader images. The utility offers flexibility along with an intuitive API for maximum control.
 
-To use the library, **Python 3.8** or higher is required. An alternative method is available via the [web version](https://lkpatcher.r0rt1z2.com/), which is not open-source but offers the same functionality with a GUI.
+To use the library, **Python 3.10** or higher is required. An alternative method is available via the [web version](https://lkpatcher.r0rt1z2.com/), which is not open-source but offers the same functionality with a GUI.
 
 ## Installation
 

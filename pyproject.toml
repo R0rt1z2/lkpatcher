@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Advanced tool for patching and analyzing MediaTek bootloader (LK) images."
 readme = "README.md"
-requires-python = ">=3.8.0"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
@@ -30,6 +30,6 @@ documentation = "https://github.com/R0rt1z2/lkpatcher/blob/master/README.md"
 issues = "https://github.com/R0rt1z2/lkpatcher/issues"
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.10"
 disallow_untyped_defs = true
 disallow_incomplete_defs = true

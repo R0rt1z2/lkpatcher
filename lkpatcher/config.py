@@ -10,7 +10,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
-from typing import Any, Dict, Optional, Set, Union
+from typing import Any
 
 from lkpatcher.exceptions import ConfigurationError
 
@@ -81,15 +81,15 @@ class PatcherConfig:
 
     log_level: LogLevel = LogLevel.INFO
     backup: bool = False
-    backup_dir: Optional[Path] = None
+    backup_dir: Path | None = None
     verify_patch: bool = True
     allow_incomplete: bool = True
     dry_run: bool = False
-    patch_categories: Set[str] = field(default_factory=set)
-    exclude_categories: Set[str] = field(default_factory=set)
+    patch_categories: set[str] = field(default_factory=set)
+    exclude_categories: set[str] = field(default_factory=set)
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> PatcherConfig:
+    def from_dict(cls, data: dict[str, Any]) -> PatcherConfig:
         """
         Create configuration from dictionary.
 
@@ -135,7 +135,7 @@ class PatcherConfig:
         return config
 
     @classmethod
-    def from_file(cls, file_path: Union[str, Path]) -> PatcherConfig:
+    def from_file(cls, file_path: str | Path) -> PatcherConfig:
         """
         Load configuration from a JSON file.
 
@@ -157,9 +157,9 @@ class PatcherConfig:
         except json.JSONDecodeError as e:
             raise ConfigurationError(f'Invalid JSON: {e}', file_path)
         except Exception as e:
-            raise ConfigurationError(str(e), file_path)
+            raise ConfigurationError(str(e), file_path) from e
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Convert configuration to dictionary.
 
@@ -177,7 +177,7 @@ class PatcherConfig:
             'exclude_categories': list(self.exclude_categories),
         }
 
-    def save(self, file_path: Union[str, Path]) -> None:
+    def save(self, file_path: str | Path) -> None:
         """
         Save configuration to a JSON file.
 
@@ -190,7 +190,7 @@ class PatcherConfig:
         try:
             with open(file_path, 'w') as f:
                 json.dump(self.to_dict(), f, indent=4)
-        except (OSError, IOError) as e:
+        except OSError as e:
             raise ConfigurationError(
                 f'Failed to save configuration: {e}', file_path
             )

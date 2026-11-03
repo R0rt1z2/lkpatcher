@@ -11,7 +11,7 @@ import re
 from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, ClassVar, cast
 
 from liblk.exceptions import NeedleNotFoundException
 from liblk.image import LkImage
@@ -42,7 +42,7 @@ class PatchManager:
         patches_count: Total number of individual patches loaded
     """
 
-    DEFAULT_PATCHES: Dict[str, Dict[str, str]] = {
+    DEFAULT_PATCHES: ClassVar[dict[str, dict[str, str]]] = {
         # Unlock fastboot access by forcing the function
         # that checks for the unlock bit in oplusreserve
         # to always return 0 (unlocked)
@@ -72,8 +72,8 @@ class PatchManager:
 
     def __init__(
         self,
-        patches_file: Optional[Path] = None,
-        config: Optional[PatcherConfig] = None,
+        patches_file: Path | None = None,
+        config: PatcherConfig | None = None,
     ) -> None:
         """
         Initialize the patch manager.
@@ -83,7 +83,7 @@ class PatchManager:
             config: Optional configuration object
         """
         self.logger = logging.getLogger(__name__)
-        self.patches: Dict[str, Dict[str, str]] = self.DEFAULT_PATCHES.copy()
+        self.patches: dict[str, dict[str, str]] = self.DEFAULT_PATCHES.copy()
         self.config = config or PatcherConfig()
 
         if patches_file:
@@ -178,7 +178,7 @@ class PatchManager:
                         f"Patch in category '{category}' is not a valid hex string",
                     )
 
-    def get_all_patches(self) -> List[str]:
+    def get_all_patches(self) -> list[str]:
         """
         Get a flat list of all patch needles.
 
@@ -186,12 +186,10 @@ class PatchManager:
             List of all unique patch needles
         """
         return [
-            needle
-            for category in self.patches.values()
-            for needle in category.keys()
+            needle for category in self.patches.values() for needle in category
         ]
 
-    def get_applicable_patches(self) -> Dict[str, Dict[str, str]]:
+    def get_applicable_patches(self) -> dict[str, dict[str, str]]:
         """
         Get patches that should be applied based on configuration.
 
@@ -200,7 +198,7 @@ class PatchManager:
         Returns:
             Dictionary of patches to apply
         """
-        result: Dict[str, Dict[str, str]] = {}
+        result: dict[str, dict[str, str]] = {}
 
         for category, patches in self.patches.items():
             if self.config.should_apply_category(category):
@@ -241,9 +239,9 @@ class LkPatcher:
 
     def __init__(
         self,
-        image: Union[str, Path],
-        patches: Optional[Path] = None,
-        config: Optional[PatcherConfig] = None,
+        image: str | Path,
+        patches: Path | None = None,
+        config: PatcherConfig | None = None,
         load_image: bool = True,
     ) -> None:
         """
@@ -303,8 +301,8 @@ class LkPatcher:
         self.image.contents = new_contents
 
     def apply_cert_bypass(
-        self, mode: Optional['CertBypassMode'] = None
-    ) -> List[str]:
+        self, mode: CertBypassMode | None = None
+    ) -> list[str]:
         """
         Re-sign modified partitions using the cert bypass.
 
@@ -342,7 +340,7 @@ class LkPatcher:
 
     def patch(
         self,
-        output: Union[str, Path],
+        output: str | Path,
         patch_policies: bool = False,
     ) -> Path:
         """
@@ -384,14 +382,14 @@ class LkPatcher:
         applied_count = 0
         skipped_count = 0
 
-        results: Dict[str, Dict[str, bool]] = {}
+        results: dict[str, dict[str, bool]] = {}
 
         if self.image.contents:
             original_digest = sha256(self.image.contents).hexdigest()
             self.logger.debug('Original image SHA-256: %s', original_digest)
 
         for category, patches in list(applicable_patches.items()):
-            category_results: Dict[str, bool] = {}
+            category_results: dict[str, bool] = {}
             results[category] = category_results
 
             self.logger.info(
@@ -452,7 +450,7 @@ class LkPatcher:
                                 'policy_patch': False
                             }
                             skipped_count += 1
-                    except Exception as e:
+                    except Exception as e:  # noqa: BLE001 - non-fatal step
                         self.logger.error(
                             'Failed to patch security policies: %s', e
                         )
@@ -473,8 +471,10 @@ class LkPatcher:
         if applied_count == 0 and not self.config.dry_run:
             debug_path = f'{self.image.path}.debug.txt'
             with open(debug_path, 'w') as fp:
-                for partition_name, partition in self.image.partitions.items():
-                    fp.write(f'{partition_name}:\n{partition}\n\n')
+                fp.writelines(
+                    f'{partition_name}:\n{partition}\n\n'
+                    for partition_name, partition in self.image.partitions.items()
+                )
 
             self.logger.info(
                 'Dumped partition info to %s for debugging', debug_path
@@ -531,8 +531,8 @@ class LkPatcher:
     def replace_partition(
         self,
         name: str,
-        data: Union[bytes, bytearray, Path, str],
-        memory_address: Optional[int] = None,
+        data: bytes | bytearray | Path | str,
+        memory_address: int | None = None,
     ) -> LkPartition:
         """
         Replace an existing partition's data in the LK image.
@@ -575,7 +575,7 @@ class LkPatcher:
         self.image._rebuild_contents()
         return partition
 
-    def dump_partition(self, partition_name: str) -> Optional[Path]:
+    def dump_partition(self, partition_name: str) -> Path | None:
         """
         Dump a specific partition from the bootloader image.
 
@@ -618,9 +618,7 @@ class LkPatcher:
         except (FileNotFoundError, PermissionError) as e:
             raise InvalidIOFile(str(e), output_path)
 
-    def extract_all_partitions(
-        self, output_dir: Union[str, Path]
-    ) -> List[Path]:
+    def extract_all_partitions(self, output_dir: str | Path) -> list[Path]:
         """
         Extract all partitions from the bootloader image.
 
@@ -636,7 +634,7 @@ class LkPatcher:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        saved_paths: List[Path] = []
+        saved_paths: list[Path] = []
         for partition_name, partition in self.image.partitions.items():
             safe_name = ''.join(
                 c if c.isalnum() else '_' for c in partition_name
@@ -656,7 +654,7 @@ class LkPatcher:
 
         return saved_paths
 
-    def analyze_image(self) -> Dict[str, Any]:
+    def analyze_image(self) -> dict[str, Any]:
         """
         Perform analysis on the bootloader image.
 

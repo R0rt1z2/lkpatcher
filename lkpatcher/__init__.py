@@ -25,21 +25,18 @@ module_path: Final[Path] = Path(__file__).parent
 current_path: Final[Path] = Path.cwd()
 
 __all__ = [
-    # Classes
-    'LkPatcher',
-    'PatchManager',
-    'PatcherConfig',
     'CertBypassMode',
-    # Exceptions
-    'LkPatcherError',
-    'InvalidIOFile',
-    'NoNeedlesFound',
     'ConfigurationError',
+    'InvalidIOFile',
+    'LkPatcher',
+    'LkPatcherError',
+    'NoNeedlesFound',
+    'PatchManager',
     'PatchValidationError',
-    # Constants
-    'module_path',
-    'current_path',
-    '__version__',
+    'PatcherConfig',
     '__author__',
     '__description__',
+    '__version__',
+    'current_path',
+    'module_path',
 ]

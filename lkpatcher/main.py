@@ -12,7 +12,6 @@ import sys
 from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
 from liblk.structures.partition import LkPartition
 
@@ -32,7 +31,7 @@ from lkpatcher.patcher import LkPatcher
 from lkpatcher.policy import analyze_lk_security_policies
 
 
-def setup_logging(log_level: LogLevel, log_file: Optional[Path] = None) -> None:
+def setup_logging(log_level: LogLevel, log_file: Path | None = None) -> None:
     """
     Set up logging configuration.
 
@@ -40,7 +39,7 @@ def setup_logging(log_level: LogLevel, log_file: Optional[Path] = None) -> None:
         log_level: Logging level to use
         log_file: Optional file to log to in addition to console
     """
-    handlers: List[logging.Handler] = [logging.StreamHandler()]
+    handlers: list[logging.Handler] = [logging.StreamHandler()]
 
     if log_file:
         try:
@@ -57,7 +56,7 @@ def setup_logging(log_level: LogLevel, log_file: Optional[Path] = None) -> None:
     )
 
 
-def create_backup(image_path: Path, backup_dir: Optional[Path] = None) -> Path:
+def create_backup(image_path: Path, backup_dir: Path | None = None) -> Path:
     """
     Create a backup of the original image.
 
@@ -141,7 +140,7 @@ def analyze_security_policies(patcher: LkPatcher) -> None:
 
         print('=' * 50)
 
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001 - report and keep going
         print(f'Error analyzing security policies: {e}')
 
 
@@ -231,7 +230,7 @@ def replace_partition_in_image(
     patcher: LkPatcher,
     partition_name: str,
     data_file: Path,
-    memory_address: Optional[int] = None,
+    memory_address: int | None = None,
 ) -> bool:
     """
     Replace an existing partition data in the LK image.
@@ -697,8 +696,8 @@ def main() -> int:
     except LkPatcherError as e:
         logger.error(str(e))
         return 1
-    except Exception as e:
-        logger.exception('Unexpected error: %s', e)
+    except Exception:
+        logger.exception('Unexpected error')
         return 1
 
 

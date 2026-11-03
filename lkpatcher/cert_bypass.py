@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import logging
 from enum import Enum
-from typing import List
 
 from liblk.image import LkImage
 from liblk.structures.certificate import Certificate
@@ -78,7 +77,7 @@ _BUILDERS = {
 
 def apply_cert_bypass(
     image: LkImage, mode: CertBypassMode = CertBypassMode.OVERRIDE
-) -> List[str]:
+) -> list[str]:
     """
     Re-sign every modified partition in an image using the cert bypass.
 
@@ -94,7 +93,7 @@ def apply_cert_bypass(
         Names of the partitions that were re-signed
     """
     build = _BUILDERS[CertBypassMode(mode)]
-    signed: List[str] = []
+    signed: list[str] = []
 
     for name, partition in image.partitions.items():
         if partition.cert2 is None:

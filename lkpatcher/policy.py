@@ -6,7 +6,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
 import struct
-from typing import Any, Dict, List
+from typing import Any
 
 from liblk.structures.partition import LkPartition
 
@@ -73,7 +73,7 @@ class SecurityPolicyAnalyzer:
             return 0x000FFFFF
         return 0xFFFFFFFF
 
-    def _find_default_policy_offsets(self) -> List[int]:
+    def _find_default_policy_offsets(self) -> list[int]:
         """Find all candidate offsets for 'default' policy strings."""
         offsets = []
         search_pos = 0
@@ -87,7 +87,7 @@ class SecurityPolicyAnalyzer:
 
         return offsets
 
-    def _parse_policy_table(self, start_pos: int) -> List[SecurityPolicy]:
+    def _parse_policy_table(self, start_pos: int) -> list[SecurityPolicy]:
         """
         Parse security policy table starting at given position.
 
@@ -102,7 +102,7 @@ class SecurityPolicyAnalyzer:
 
         while pos + self.POLICY_STRUCT_SIZE <= len(self.data):
             try:
-                swid, p1, p2, p3, p4, pol1, pol2, pol3, pol4, hbind = (
+                _swid, p1, _p2, _p3, _p4, pol1, pol2, pol3, pol4, _hbind = (
                     struct.unpack(
                         self.POLICY_STRUCT_FORMAT,
                         self.data[pos : pos + self.POLICY_STRUCT_SIZE],
@@ -130,7 +130,7 @@ class SecurityPolicyAnalyzer:
 
         return policies
 
-    def analyze_security_policies(self) -> Dict[str, Any]:
+    def analyze_security_policies(self) -> dict[str, Any]:
         """
         Analyze security policies in the LK partition.
 
@@ -159,11 +159,9 @@ class SecurityPolicyAnalyzer:
                     continue
 
                 try:
-                    swid, p1, p2, p3, p4, pol1, pol2, pol3, pol4, hbind = (
-                        struct.unpack(
-                            self.POLICY_STRUCT_FORMAT,
-                            self.data[pos : pos + self.POLICY_STRUCT_SIZE],
-                        )
+                    swid, _p1, p2, p3, *_ = struct.unpack(
+                        self.POLICY_STRUCT_FORMAT,
+                        self.data[pos : pos + self.POLICY_STRUCT_SIZE],
                     )
 
                     if swid != 0 or p2 != 0 or p3 != 0:
@@ -299,7 +297,7 @@ class SecurityPolicyAnalyzer:
         return True
 
 
-def analyze_lk_security_policies(lk_partition: LkPartition) -> Dict[str, Any]:
+def analyze_lk_security_policies(lk_partition: LkPartition) -> dict[str, Any]:
     """
     Analyze security policies in an LK partition.
 

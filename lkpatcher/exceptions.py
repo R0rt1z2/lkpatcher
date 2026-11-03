@@ -6,7 +6,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional, Union
 
 
 class LkPatcherError(Exception):
@@ -32,7 +31,7 @@ class InvalidIOFile(LkPatcherError):
         reason: Specific reason for I/O failure
     """
 
-    def __init__(self, reason: str, file: Union[str, Path]):
+    def __init__(self, reason: str, file: str | Path):
         """
         Initialize the invalid I/O file error.
 
@@ -53,7 +52,7 @@ class NoNeedlesFound(LkPatcherError):
         image: Path to the image where no needles were found
     """
 
-    def __init__(self, image: Union[str, Path]):
+    def __init__(self, image: str | Path):
         """
         Initialize the no needles found error.
 
@@ -73,9 +72,7 @@ class ConfigurationError(LkPatcherError):
         detail: Detailed description of the configuration error
     """
 
-    def __init__(
-        self, detail: str, config_file: Optional[Union[str, Path]] = None
-    ):
+    def __init__(self, detail: str, config_file: str | Path | None = None):
         """
         Initialize the configuration error.
 

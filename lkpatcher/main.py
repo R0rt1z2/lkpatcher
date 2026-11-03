@@ -227,6 +227,45 @@ def add_partition_to_image(
     print(f'Added partition: {partition_name} ({len(partition_data)} bytes)')
 
 
+def replace_partition_in_image(
+    patcher: LkPatcher,
+    partition_name: str,
+    data_file: Path,
+    memory_address: Optional[int] = None,
+) -> bool:
+    """
+    Replace an existing partition data in the LK image.
+
+    Args:
+        patcher: LkPatcher instance
+        partition_name: Name of target partition
+        data_file: Path to file containing new partition data
+        memory_address: Optional memory address for the partition
+
+    Returns:
+        True if replaced successfully, False otherwise
+    """
+    if not data_file.exists():
+        raise InvalidIOFile(f'Data file not found: {data_file}', data_file)
+
+    if partition_name not in patcher.image.partitions:
+        print(f'Error: Partition not found: {partition_name}')
+        list_partitions(patcher)
+        return False
+
+    with open(data_file, 'rb') as f:
+        partition_data = f.read()
+
+    patcher.replace_partition(
+        name=partition_name,
+        data=partition_data,
+        memory_address=memory_address,
+    )
+
+    print(f'Replaced partition: {partition_name} ({len(partition_data)} bytes)')
+    return True
+
+
 def remove_partition_from_image(
     patcher: LkPatcher, partition_name: str
 ) -> None:
@@ -303,6 +342,7 @@ def main() -> int:
         '  %(prog)s lk.img --analyze-policies    # Analyze security policies\n'
         '  %(prog)s --export-config config.json  # Export default config\n'
         '  %(prog)s lk.img --add-partition custom data.bin  # Add partition\n'
+        '  %(prog)s lk.img --replace-partition lk u-boot.bin # Replace partition\n'
         '  %(prog)s lk.img --remove-partition unwanted      # Remove partition',
     )
 
@@ -368,9 +408,8 @@ def main() -> int:
         choices=['wrap', 'override'],
         default=None,
         metavar='MODE',
-        help='Re-sign a patched image with the cert bypass and '
-        "exit, without applying any patches (MODE: 'override' (default) or "
-        "'wrap')",
+        help='Re-sign modified partitions with the cert bypass '
+        "(MODE: 'override' (default) or 'wrap')",
     )
     group.add_argument(
         '--dry-run',
@@ -386,6 +425,12 @@ def main() -> int:
         help='Add new partition with NAME from DATA_FILE',
     )
     partition_group.add_argument(
+        '--replace-partition',
+        nargs=2,
+        metavar=('NAME', 'DATA_FILE'),
+        help='Replace partition with NAME from DATA_FILE',
+    )
+    partition_group.add_argument(
         '--remove-partition',
         metavar='NAME',
         help='Remove partition with NAME',
@@ -399,8 +444,8 @@ def main() -> int:
     partition_group.add_argument(
         '--partition-address',
         type=lambda x: int(x, 0),
-        default=0,
-        help='Memory address for new partition (hex or decimal)',
+        default=None,
+        help='Memory address for new or replaced partition (hex or decimal)',
     )
     partition_group.add_argument(
         '--partition-legacy',
@@ -484,8 +529,10 @@ def main() -> int:
                 args.partition_info,
                 args.analyze_policies,
                 args.add_partition,
+                args.replace_partition,
                 args.remove_partition,
                 args.add_certificate,
+                args.cert_bypass,
                 args.output,
             ]
         ):
@@ -550,11 +597,61 @@ def main() -> int:
             result = patcher.dump_partition(args.dump_partition)
             return 0 if result else 1
 
-        if args.cert_bypass is not None:
-            mode = CertBypassMode(args.cert_bypass)
-            output_path = args.output or args.bootloader_image.with_stem(
+        if args.add_partition:
+            partition_name, data_file = args.add_partition
+            add_partition_to_image(
+                patcher,
+                partition_name,
+                Path(data_file),
+                args.partition_address
+                if args.partition_address is not None
+                else 0,
+                not args.partition_legacy,
+            )
+            partition_modified = True
+
+        if args.replace_partition:
+            partition_name, data_file = args.replace_partition
+            if not replace_partition_in_image(
+                patcher,
+                partition_name,
+                Path(data_file),
+                args.partition_address,
+            ):
+                return 1
+            partition_modified = True
+
+        if args.remove_partition:
+            remove_partition_from_image(patcher, args.remove_partition)
+            partition_modified = True
+
+        if args.add_certificate:
+            partition_name, cert_file = args.add_certificate
+            add_certificate_to_partition(
+                patcher, partition_name, Path(cert_file), args.cert_type
+            )
+            partition_modified = True
+
+        if args.output:
+            output_path = args.output
+        elif args.cert_bypass is not None:
+            output_path = args.bootloader_image.with_stem(
                 f'{args.bootloader_image.stem}-signed'
             )
+        else:
+            suffix = '-modified' if partition_modified else '-patched'
+            output_path = args.bootloader_image.with_stem(
+                f'{args.bootloader_image.stem}{suffix}'
+            )
+
+        if config.backup and not config.dry_run:
+            backup_path = create_backup(
+                args.bootloader_image, config.backup_dir
+            )
+            logger.info('Created backup at %s', backup_path)
+
+        if args.cert_bypass is not None:
+            mode = CertBypassMode(args.cert_bypass)
 
             if config.dry_run:
                 logger.info(
@@ -563,12 +660,6 @@ def main() -> int:
                     output_path,
                 )
                 return 0
-
-            if config.backup:
-                backup_path = create_backup(
-                    args.bootloader_image, config.backup_dir
-                )
-                logger.info('Created backup at %s', backup_path)
 
             signed = patcher.apply_cert_bypass(mode)
             if signed:
@@ -585,42 +676,6 @@ def main() -> int:
             patcher.image.save(output_path)
             logger.info('Re-signed image saved to %s', output_path)
             return 0
-
-        if args.add_partition:
-            partition_name, data_file = args.add_partition
-            add_partition_to_image(
-                patcher,
-                partition_name,
-                Path(data_file),
-                args.partition_address,
-                not args.partition_legacy,
-            )
-            partition_modified = True
-
-        if args.remove_partition:
-            remove_partition_from_image(patcher, args.remove_partition)
-            partition_modified = True
-
-        if args.add_certificate:
-            partition_name, cert_file = args.add_certificate
-            add_certificate_to_partition(
-                patcher, partition_name, Path(cert_file), args.cert_type
-            )
-            partition_modified = True
-
-        if args.output:
-            output_path = args.output
-        else:
-            suffix = '-modified' if partition_modified else '-patched'
-            output_path = args.bootloader_image.with_stem(
-                f'{args.bootloader_image.stem}{suffix}'
-            )
-
-        if config.backup and not config.dry_run:
-            backup_path = create_backup(
-                args.bootloader_image, config.backup_dir
-            )
-            logger.info('Created backup at %s', backup_path)
 
         if partition_modified:
             if not config.dry_run:

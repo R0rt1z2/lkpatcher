@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 from liblk.exceptions import NeedleNotFoundException
 from liblk.image import LkImage
+from liblk.structures.partition import LkPartition
 
 from lkpatcher.config import PatcherConfig
 from lkpatcher.exceptions import (
@@ -336,6 +337,7 @@ class LkPatcher:
                 trailing
             )
 
+            self.image.partitions = signed_image.partitions
         return signed
 
     def patch(
@@ -525,6 +527,53 @@ class LkPatcher:
             )
 
         return Path(output)
+
+    def replace_partition(
+        self,
+        name: str,
+        data: Union[bytes, bytearray, Path, str],
+        memory_address: Optional[int] = None,
+    ) -> LkPartition:
+        """
+        Replace an existing partition's data in the LK image.
+
+        Args:
+            name: Name of the partition to replace
+            data: New partition data or path to file containing data
+            memory_address: Optional memory address for the partition
+
+        Returns:
+            The modified LkPartition
+
+        Raises:
+            KeyError: If partition not found
+            InvalidIOFile: If data is a path and file cannot be read
+        """
+        if name not in self.image.partitions:
+            raise KeyError(f"Partition '{name}' not found")
+
+        if isinstance(data, (Path, str)):
+            path = Path(data)
+            if not path.exists():
+                raise InvalidIOFile(f'Data file not found: {path}', path)
+            try:
+                with open(path, 'rb') as f:
+                    partition_data = f.read()
+            except OSError as e:
+                raise InvalidIOFile(str(e), path)
+        else:
+            partition_data = bytes(data)
+
+        partition = self.image.partitions[name]
+        partition.data = partition_data
+
+        if memory_address is not None:
+            partition.header.memory_address = memory_address
+            if name == 'lk':
+                partition.lk_address = memory_address
+
+        self.image._rebuild_contents()
+        return partition
 
     def dump_partition(self, partition_name: str) -> Optional[Path]:
         """
